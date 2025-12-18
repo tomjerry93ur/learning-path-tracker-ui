@@ -30,7 +30,11 @@ export default function PathDetailPage() {
     }
   }, [path, setPaths]);
 
-  const sectionData = mockedPaths[0]?.sections ?? [];
+  const sectionData = useMemo(() => {
+    const targetId = path?.id ?? id;
+    const matched = mockedPaths.find((mockPath) => String(mockPath.id) === String(targetId));
+    return matched?.sections ?? mockedPaths[0]?.sections ?? [];
+  }, [id, path?.id]);
 
   if (!path && loading) {
     return <div className="dashboard-shell">Loading...</div>;

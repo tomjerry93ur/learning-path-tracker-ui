@@ -128,3 +128,27 @@ export function getOverviewStats() {
     { label: "Average Progress", value: `${Math.round(averageProgress * 100)}%`, note: "Across all paths" }
   ];
 }
+
+export const demoCredentials = [
+  {
+    id: "demo-admin",
+    label: "Product Demo Admin",
+    username: "demo@pathprogress.app",
+    password: "learn123",
+    token: "demo-token-admin"
+  },
+  {
+    id: "demo-mentor",
+    label: "Mentor View",
+    username: "mentor@pathprogress.app",
+    password: "coachme",
+    token: "demo-token-mentor"
+  },
+  {
+    id: "demo-student",
+    label: "Learner View",
+    username: "student@pathprogress.app",
+    password: "focus247",
+    token: "demo-token-student"
+  }
+];

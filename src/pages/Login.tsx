@@ -5,6 +5,7 @@ import { login } from "../api/auth";
 import { fetchPaths } from "../api/paths";
 import { usePaths } from "../context/PathsContext";
 import { useAuth } from "../context/AuthContext";
+import { demoCredentials } from "../data/mockData";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ identifier: "", password: "", remember: false });
@@ -115,6 +116,23 @@ export default function LoginPage() {
             Register
           </Link>
         </p>
+        <section className="demo-accounts">
+          <div className="demo-accounts-headline">
+            <h2>Demo Accounts</h2>
+            <p>Use any of these if the backend is offline.</p>
+          </div>
+          <div className="demo-accounts-grid">
+            {demoCredentials.map((account) => (
+              <article key={account.id} className="demo-account-card">
+                <p className="demo-account-label">{account.label}</p>
+                <p className="demo-account-username">{account.username}</p>
+                <p className="demo-account-password">
+                  Password: <span>{account.password}</span>
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from "react";
-import { PathResponse } from "../api/paths";
+import { PathResponse } from "../types/paths";
 
 type PathsContextValue = {
   paths: PathResponse[];

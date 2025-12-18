@@ -1,29 +1,27 @@
+import { getDemoPaths, addDemoPath } from "../data/demoStore";
+import { PathPayload, PathResponse } from "../types/paths";
 import { apiClient } from "./client";
 
-export type PathStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
-
-export interface PathResponse {
-  id?: number;
-  title: string;
-  description: string;
-  startDate: string;
-  targetEndDate: string;
-  status: PathStatus;
-}
-
-export interface PathPayload {
-  title: string;
-  description: string;
-  startDate: string;
-  targetEndDate: string;
+function simulateDelay<T>(value: T, timeout = 400) {
+  return new Promise<T>((resolve) => setTimeout(() => resolve(value), timeout));
 }
 
 export async function createPath(payload: PathPayload): Promise<PathResponse> {
-  const response = await apiClient.post<PathResponse>("/paths", payload);
-  return response.data;
+  try {
+    const response = await apiClient.post<PathResponse>("/paths", payload);
+    return response.data;
+  } catch (error) {
+    console.warn("createPath falling back to demo data. Reason:", error);
+    return simulateDelay(addDemoPath(payload));
+  }
 }
 
 export async function fetchPaths(): Promise<PathResponse[]> {
-  const response = await apiClient.get<PathResponse[]>("/paths");
-  return response.data;
+  try {
+    const response = await apiClient.get<PathResponse[]>("/paths");
+    return response.data;
+  } catch (error) {
+    console.warn("fetchPaths falling back to demo data. Reason:", error);
+    return simulateDelay(getDemoPaths());
+  }
 }
