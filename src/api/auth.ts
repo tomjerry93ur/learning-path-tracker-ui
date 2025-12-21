@@ -17,7 +17,23 @@ export interface AuthPayload {
 }
 
 export interface LoginResponse {
-  token: string;
+  accessToken: string;
+  tokenType: string;
+  expiresIn: number;
+}
+
+interface LoginApiResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
+function normalizeLoginResponse(response: LoginApiResponse): LoginResponse {
+  return {
+    accessToken: response.access_token,
+    tokenType: response.token_type,
+    expiresIn: response.expires_in
+  };
 }
 
 export async function login(payload: AuthPayload): Promise<LoginResponse> {
@@ -27,12 +43,12 @@ export async function login(payload: AuthPayload): Promise<LoginResponse> {
   );
 
   if (demoUser) {
-    return simulateDelay({ token: demoUser.token });
+    return simulateDelay({ accessToken: demoUser.token, tokenType: "Bearer", expiresIn: 3600 });
   }
 
   try {
-    const response = await apiClient.post<LoginResponse>("/auth/login", payload);
-    return response.data;
+    const response = await apiClient.post<LoginApiResponse>("/auth/login", payload);
+    return normalizeLoginResponse(response.data);
   } catch (error) {
     if (isServerResponseError(error)) {
       throw error;

@@ -45,8 +45,8 @@ export default function LoginPage() {
     setStatus(null);
     try {
       const response = await login({ username: form.identifier.trim(), password: form.password });
-      authenticate(response.token, form.identifier.trim());
-      const pathList = await fetchPaths();
+      authenticate(response.accessToken, form.identifier.trim());
+      const { paths: pathList } = await fetchPaths();
       setPaths(pathList);
       setStatus({ tone: "success", text: "Logged in successfully." });
       if (pathList.length === 0) {

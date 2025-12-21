@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "../App.css";
 import { fetchPaths } from "../api/paths";
 import { usePaths } from "../context/PathsContext";
 import { getOverviewStats, mockedActivity } from "../data/mockData";
 import AppHeader from "../components/AppHeader";
+import { LearningPathDashboard } from "../types/paths";
 
 const pathVisuals = [
   "https://i.imgur.com/ylrC5bN.png",
@@ -16,16 +17,28 @@ const pathVisuals = [
 ];
 
 export default function DashboardPage() {
-  const overviewStats = getOverviewStats();
   const { paths, setPaths } = usePaths();
   const [loading, setLoading] = useState(false);
+  const [analytics, setAnalytics] = useState<LearningPathDashboard | null>(null);
+  const overviewStats = useMemo(() => {
+    if (!analytics) {
+      return getOverviewStats();
+    }
+    return [
+      { label: "Total Paths", value: analytics.totalPaths ?? "0", note: "+1 new this month" },
+      { label: "Paths in Progress", value: analytics.pathsInProgress ?? "0", note: "Currently active" },
+      { label: "Completed Paths", value: analytics.completedPaths ?? "0", note: "Great work!" },
+      { label: "Average Progress", value: analytics.averageProgress ?? "0%", note: "Across all paths" }
+    ];
+  }, [analytics]);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
         const result = await fetchPaths();
-        setPaths(result);
+        setPaths(result.paths);
+        setAnalytics(result.analytics ?? null);
       } finally {
         setLoading(false);
       }

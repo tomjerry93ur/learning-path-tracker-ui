@@ -1,7 +1,9 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import "../App.css";
 import AppHeader from "../components/AppHeader";
+import { createTask } from "../api/paths";
+import { TaskStatus } from "../types/paths";
 
 export default function CreateTaskPage() {
   const { id, sectionId } = useParams();
@@ -16,14 +18,43 @@ export default function CreateTaskPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (event: FormEvent) => {
+  const taskStatusMap = useMemo<Record<string, TaskStatus>>(
+    () => ({
+      "To Do": "NOT_STARTED",
+      "In Progress": "IN_PROGRESS",
+      Done: "COMPLETED"
+    }),
+    []
+  );
+
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (!id || !sectionId) {
+      setMessage({ tone: "error", text: "Missing path or section information. Return to the path and try again." });
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setMessage({ tone: "success", text: "Task saved. Wire to API when ready." });
+    setMessage(null);
+    const status = taskStatusMap[form.status] ?? "NOT_STARTED";
+    try {
+      await createTask(id, sectionId, {
+        title: form.title.trim(),
+        description: form.description.trim() || undefined,
+        status,
+        type: status,
+        estimatedMinutes: form.hours ? Math.round(Number(form.hours) * 60) : undefined
+      });
+      setMessage({ tone: "success", text: "Task created successfully." });
       navigate(`/paths/${id}`);
-    }, 800);
+    } catch (error) {
+      const text =
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message?: string }).message ?? "Unable to create task right now.")
+          : "Unable to create task right now.";
+      setMessage({ tone: "error", text });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

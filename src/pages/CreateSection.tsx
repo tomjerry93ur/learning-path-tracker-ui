@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import "../App.css";
 import AppHeader from "../components/AppHeader";
+import { createSection } from "../api/paths";
 
 export default function CreateSectionPage() {
   const { id } = useParams();
@@ -15,14 +16,32 @@ export default function CreateSectionPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (!id) {
+      setMessage({ tone: "error", text: "Unable to determine the path. Please go back and retry." });
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setMessage({ tone: "success", text: "Section saved. Hook up API when ready." });
+    setMessage(null);
+    try {
+      await createSection(id, {
+        title: form.title.trim(),
+        description: form.description.trim() || undefined,
+        estimatedDays: form.targetDays ? Number(form.targetDays) : undefined,
+        orderIndex: form.plannedHours ? Number(form.plannedHours) : undefined
+      });
+      setMessage({ tone: "success", text: "Section created successfully." });
       navigate(`/paths/${id}`);
-    }, 800);
+    } catch (error) {
+      const text =
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message?: string }).message ?? "Unable to create section right now.")
+          : "Unable to create section right now.";
+      setMessage({ tone: "error", text });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
